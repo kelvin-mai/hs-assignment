@@ -2,5 +2,9 @@
                       :server-name #or [#env POSTGRES_HOST "localhost"]
                       :database-name #or [#env POSTGRES_DB "samurai_db"]
                       :username #or [#env POSTGRES_USER "postgres"]
-                      :password #or [#env POSTGRES_PASSWORD "postgres"]}}
- :postgres/db {:config #ig/ref :system/config}}
+                      :password #or [#env POSTGRES_PASSWORD "postgres"]}
+                 :port #or [#env PORT 8080]}
+ :postgres/db {:config #ig/ref :system/config}
+ :reitit/router {:db #ig/ref :postgres/db}
+ :http/server {:router #ig/ref :reitit/router
+               :config #ig/ref :system/config}}
