@@ -1,7 +1,9 @@
 (ns app.system.core
   (:require [aero.core :as aero]
             [integrant.core :as ig]
-            app.system.db))
+            app.system.db
+            app.system.router
+            app.system.server))
 
 (defmethod aero/reader 'ig/ref
   [_ _ value]

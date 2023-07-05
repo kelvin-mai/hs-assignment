@@ -42,9 +42,9 @@
 
 (def routes
   ["/patient"
-   ["/" {:get {:handler get-all-patients}
-         :post {:parameters {:body patient.schema/create-body}
-                :handler create-patient}}]
+   ["" {:get {:handler get-all-patients}
+        :post {:parameters {:body patient.schema/create-body}
+               :handler create-patient}}]
    ["/:id" {:parameters {:path patient.schema/id-path}
             :get get-patient-by-id
             :delete delete-patient

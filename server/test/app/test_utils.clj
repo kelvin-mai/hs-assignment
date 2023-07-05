@@ -13,3 +13,14 @@
     (test-fn)
     (ig/halt! @test-system)
     (reset! test-system nil)))
+
+(defn request
+  ([router method uri]
+   (request router method uri {}))
+  ([router method uri opts]
+   (->> (router (merge
+                 {:request-method method
+                  :uri uri}
+                 opts))
+        :body
+        (m/decode "application/json"))))

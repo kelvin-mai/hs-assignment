@@ -21,7 +21,9 @@
                              "--interactive"]}
            :migrate {:main-opts ["-m" "app.migrations.core"]}
            :test {:extra-paths ["server/test"]
-                  :extra-deps {lambdaisland/kaocha {:mvn/version "1.84.1342"}
-                               lambdaisland/kaocha-cloverage {:mvn/version "1.1.89"}}
-                  :main-opts ["-m" "kaocha.runner"]}}}
+                  :extra-deps {io.github.cognitect-labs/test-runner
+                               {:git/tag "v0.5.1" :git/sha "dfb30dd"}}
+                  :main-opts ["-m" "cognitect.test-runner"
+                              "-d" "server/test"]
+                  :exec-fn cognitect.test-runner.api/test}}}
 

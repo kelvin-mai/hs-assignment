@@ -2,7 +2,9 @@
   (:require [integrant.core :as ig]
             [muuntaja.core :as m]
             [reitit.ring :as ring]
+            [reitit.coercion.malli :as malli]
             [app.routing.middleware :as mw]
+            [app.routing.coercion :refer [coercion]]
             [app.api.routes :refer [api-routes]]))
 
 (defmethod ig/init-key :reitit/router
@@ -12,6 +14,7 @@
    (ring/router
     [api-routes]
     {:data {:env {:db db}
+            :coercion coercion
             :muuntaja m/instance
             :middleware mw/global-middleware}})
    (ring/routes
