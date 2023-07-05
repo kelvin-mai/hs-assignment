@@ -1,0 +1,12 @@
+{:deps {:aliases [:client]}
+ :nrepl {:port 9000}
+ :builds {:app {:target :browser
+                :output-dir "resources/public/js"
+                :asset-path "/js"
+                :modules {:main {:init-fn app.core/init}}
+                :devtools {:after-load app.core/reload
+                           :preloads [day8.re-frame-10x.preload]
+                           :http-root "resources/public"
+                           :http-port 3000}
+                :closure-defines {re-frame.trace.trace-enabled? true
+                                  day8.re-frame.tracing.trace-enabled? true}}}}
