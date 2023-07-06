@@ -1,16 +1,26 @@
 (ns app.api.patient.db
-  (:require [app.utils.db :as db]))
+  (:require [honey.sql.helpers :as sqlh]
+            [app.utils.db :as db]))
 
 (defn- cast-enums [data]
   (cond-> data
     (:sex data) (assoc :sex [:cast (:sex data) :sex])
     (:gender data) (assoc :gender [:cast (:gender data) :gender])))
 
+(defn search-query
+  [{:keys [attr dir limit offset]}]
+  (let [query {:select [:*
+                        [[:over [[:count :patient.id]]] "total"]]
+               :from :patient}]
+    (-> query
+        (sqlh/order-by [(keyword attr) (keyword dir) :null-last])
+        (sqlh/limit limit)
+        (sqlh/offset offset))))
+
 (defn get-all
-  [db]
-  (db/query! db
-             {:select [:*]
-              :from :patient}))
+  [db q]
+  (let [query (search-query q)]
+    (db/query! db query)))
 
 (defn get-by-id
   [db id]

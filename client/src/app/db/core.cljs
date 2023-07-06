@@ -1,23 +1,26 @@
 (ns app.db.core
   (:require [re-frame.core :as rf]
             [ajax.core :as ajax]
-            [day8.re-frame.http-fx]))
+            [day8.re-frame.http-fx]
+            [app.db.patient :as patient]))
 
 (def base-url "http://localhost:8080")
 
-(def app-db
-  {})
+(def initial-db
+  (merge {}
+         patient/initial-state))
 
 (rf/reg-event-db
  :initialize-db
- (fn [] app-db))
+ (fn [] initial-db))
 
 (rf/reg-event-fx
  :http
- (fn [_ [_ {:keys [method url data headers on-success on-failure]}]]
+ (fn [_ [_ {:keys [method url data headers on-success on-failure query]}]]
    {:http-xhrio {:method (or method :get)
                  :uri (str base-url url)
                  :params data
+                 :url-params query
                  :headers headers
                  :timeout 5000
                  :format (ajax/json-request-format)

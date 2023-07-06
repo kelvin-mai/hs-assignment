@@ -5,8 +5,9 @@
             [app.routing.exception :refer [not-found]]))
 
 (defn get-all-patients
-  [{:keys [db]}]
-  (let [response (patient.db/get-all db)]
+  [{:keys [db parameters]}]
+  (let [query (:query parameters)
+        response (patient.db/get-all db query)]
     (ok response)))
 
 (defn create-patient
@@ -42,7 +43,8 @@
 
 (def routes
   ["/patient"
-   ["" {:get {:handler get-all-patients}
+   ["" {:get {:parameters {:query patient.schema/search-query}
+              :handler get-all-patients}
         :post {:parameters {:body patient.schema/create-body}
                :handler create-patient}}]
    ["/:id" {:parameters {:path patient.schema/id-path}

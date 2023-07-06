@@ -1,9 +1,8 @@
 (ns app.core
   (:require [reagent.dom :as rdom]
-            [re-frame.core :as rf]))
-
-(defn app []
-  [:main "app works!"])
+            [re-frame.core :as rf]
+            [app.components.core :refer [app]]
+            app.db.core))
 
 (defn ^:dev/after-load reload []
   (rf/clear-subscription-cache!)

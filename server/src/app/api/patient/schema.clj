@@ -10,6 +10,14 @@
   [:map
    [:id (nanoid?)]])
 
+(def search-query
+  (mu/optional-keys
+   [:map
+    [:attr :keyword]
+    [:dir [:enum :asc :desc]]
+    [:limit :int]
+    [:offset :int]]))
+
 (def create-body
   (mu/merge
    [:map
