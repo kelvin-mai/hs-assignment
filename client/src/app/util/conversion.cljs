@@ -30,3 +30,7 @@
 (defn dayjs->date-string [d]
   (when d
     (.format (dayjs d) "YYYY-MM-DD")))
+
+(defn inst-string->dayjs [d]
+  (when d
+    (dayjs d)))

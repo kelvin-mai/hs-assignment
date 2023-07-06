@@ -2,17 +2,22 @@
   (:require [re-frame.core :as rf]
             [app.util.conversion :refer [stringify-kw
                                          remove-nils
-                                         dayjs->date-string]]))
+                                         dayjs->date-string
+                                         inst-string->dayjs]]))
+
+(def initial-form
+  {:patient/name nil
+   :patient/address nil
+   :patient/sex nil
+   :patient/gender nil})
 
 (def initial-state
   {::patient {:pagination {:page 0
                            :rows-per-page 10
                            :attr :patient/created
                            :dir :desc}
-              :form {:name nil
-                     :address nil
-                     :sex nil
-                     :gender nil}
+              :editable? false
+              :form initial-form
               :data []}})
 
 (rf/reg-event-fx
@@ -38,19 +43,54 @@
    (assoc-in db [::patient :data] data)))
 
 (rf/reg-event-fx
+ ::fetch-patient
+ (fn [{:keys [db]} [_ id]]
+   {:fx [[:dispatch [:http {:url (str "/api/patient/" id)
+                            :method :get
+                            :on-success [::fetch-patient-success]}]]]}))
+
+(rf/reg-event-db
+ ::fetch-patient-success
+ (fn [db [_ {:keys [data]}]]
+   (let [data (-> data
+                  (assoc :patient/dob (inst-string->dayjs (:patient/dob data))))]
+     (assoc-in db [::patient :form] data))))
+
+(rf/reg-event-fx
  ::submit-patient-form
  (fn [{:keys [db]} [_]]
    (let [data (get-in db [::patient :form])
-         data (-> data
-                  (assoc :dob (dayjs->date-string (:dob data)))
-                  (remove-nils))
+         current-route (get-in db [:app.db.router/router :data :name])
+         id (get-in db [:app.db.router/router :parameters :path :id])
+         data (cond-> data
+                true (assoc :patient/dob (dayjs->date-string (:patient/dob data)))
+                true (remove-nils)
+                (= current-route :app.router/new-patient) (update-keys (comp keyword name))
+                (= current-route :app.router/existing-patient) (dissoc :patient/created))
          url "/api/patient"
-         method :post]
+         url (if (= current-route :app.router/new-patient)
+               url
+               (str url "/" id))
+         method (if (= current-route :app.router/new-patient)
+                  :post
+                  :put)]
      {:db db
       :fx [[:dispatch [:http {:url url
                               :data data
                               :method method
                               :on-success [:app.db.router/push-state :app.router/home]}]]]})))
+
+(rf/reg-event-fx
+ ::delete-patient
+ (fn [_ [_ id]]
+   {:fx [[:dispatch [:http {:url (str "/api/patient/" id)
+                            :method :delete
+                            :on-success [:app.db.router/push-state :app.router/home]}]]]}))
+
+(rf/reg-event-db
+ ::set-editable?
+ (fn [db [_ v]]
+   (assoc-in db [::patient :editable?] v)))
 
 (rf/reg-event-fx
  ::set-page
@@ -86,6 +126,11 @@
  (fn [db [_ attr v]]
    (assoc-in db [::patient :form attr] v)))
 
+(rf/reg-event-db
+ ::reset-form-values
+ (fn [db [_ _]]
+   (assoc-in db [::patient :form] initial-form)))
+
 (rf/reg-sub
  ::patients
  (fn [db] (get-in db [::patient :data])))
@@ -93,6 +138,10 @@
 (rf/reg-sub
  ::pagination
  (fn [db] (get-in db [::patient :pagination])))
+
+(rf/reg-sub
+ ::editable?
+ (fn [db] (get-in db [::patient :editable?])))
 
 (rf/reg-sub
  ::form
