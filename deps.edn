@@ -24,7 +24,8 @@
                                  day8.re-frame/http-fx {:mvn/version "0.2.4"}}}
            :dev {:extra-paths ["dev" "server/test"]
                  :extra-deps {nrepl/nrepl {:mvn/version "1.0.0"}
-                              cider/cider-nrepl {:mvn/version "0.31.0"}}
+                              cider/cider-nrepl {:mvn/version "0.31.0"}
+                              talltale/talltale {:mvn/version "0.5.4"}}
                  :main-opts ["-m" "nrepl.cmdline"
                              "--middleware" "[cider.nrepl/cider-middleware]"
                              "--interactive"]}

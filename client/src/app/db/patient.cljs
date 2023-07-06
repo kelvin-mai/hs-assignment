@@ -40,20 +40,24 @@
 (rf/reg-event-fx
  ::set-rows-per-page
  (fn [{:keys [db]} [_ n]]
-   {:db (assoc-in db [::patient :pagination :rows-per-page] n)
+   {:db (-> db
+            (assoc-in [::patient :pagination :page] 0)
+            (assoc-in [::patient :pagination :rows-per-page] n))
     :fx [[:dispatch [::fetch-patients]]]}))
 
 (rf/reg-event-fx
  ::set-sort
  (fn [{:keys [db]} [_ kw]]
-   (let [{:keys [attr dir]} (get-in db [::patient :pagination])
+   (let [{:keys [rows-per-page attr dir]} (get-in db [::patient :pagination])
          {:keys [attr dir]} (cond (not= attr kw) {:attr kw
                                                   :dir :asc}
                                   (= :asc dir) {:attr attr :dir :desc}
                                   (or (= :desc dir) (nil? dir)) {:attr attr :dir :asc})]
-     {:db (-> db
-              (assoc-in [::patient :pagination :attr] attr)
-              (assoc-in [::patient :pagination :dir] dir))
+     {:db (assoc-in db [::patient :pagination]
+                    {:page 0
+                     :rows-per-page rows-per-page
+                     :attr attr
+                     :dir dir})
       :fx [[:dispatch [::fetch-patients]]]})))
 
 (rf/reg-sub

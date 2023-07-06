@@ -1,6 +1,9 @@
 (ns app.components.patient-table
   (:require [re-frame.core :as rf]
-            [app.util.conversion :refer [same-sex-gender]]
+            [tick.core :as t]
+            [app.util.conversion :refer [same-sex-gender
+                                         inst->date-string
+                                         inst->datetime-string]]
             [app.db.patient :as patient.db]
             ["@mui/material" :refer [Table
                                      TableContainer
@@ -37,9 +40,9 @@
    [:> TableCell name]
    [:> TableCell sex]
    [:> TableCell (or gender (same-sex-gender sex))]
-   [:> TableCell dob]
+   [:> TableCell (inst->date-string dob)]
    [:> TableCell address]
-   [:> TableCell created]])
+   [:> TableCell (inst->datetime-string created)]])
 
 (defn patient-table-body [rows]
   (if rows
