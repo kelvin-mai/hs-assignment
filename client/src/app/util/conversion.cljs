@@ -12,11 +12,13 @@
     "woman"))
 
 (defn inst->date-string [s]
-  (->> s
-       (t/instant)
-       (t/date)
-       (str)))
+  (when s
+    (->> s
+         (t/instant)
+         (t/date)
+         (str))))
 
 (defn inst->datetime-string [s]
-  (let [inst (t/instant s)]
-    (str (t/date inst) " " (t/time inst))))
+  (when s
+    (let [inst (t/instant s)]
+      (str (t/date inst) " " (t/time inst)))))

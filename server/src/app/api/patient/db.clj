@@ -12,10 +12,10 @@
   (let [query {:select [:*
                         [[:over [[:count :patient.id]]] "total"]]
                :from :patient}]
-    (-> query
-        (sqlh/order-by [(keyword attr) (keyword dir) :null-last])
-        (sqlh/limit limit)
-        (sqlh/offset offset))))
+    (cond-> query
+      (and attr dir) (sqlh/order-by [(keyword attr) (keyword dir) :null-last])
+      limit (sqlh/limit limit)
+      offset (sqlh/offset offset))))
 
 (defn get-all
   [db q]

@@ -2,12 +2,14 @@
   (:require [re-frame.core :as rf]
             [ajax.core :as ajax]
             [day8.re-frame.http-fx]
+            [app.db.router :as router]
             [app.db.patient :as patient]))
 
 (def base-url "http://localhost:8080")
 
 (def initial-db
   (merge {}
+         router/initial-state
          patient/initial-state))
 
 (rf/reg-event-db

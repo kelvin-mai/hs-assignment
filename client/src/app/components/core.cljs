@@ -1,6 +1,8 @@
 (ns app.components.core
-  (:require [app.util.theme :refer [theme]]
+  (:require [re-frame.core :as rf]
+            [app.util.theme :refer [theme]]
             [app.components.patient-table :refer [patient-table]]
+            [app.db.router :as router.db]
             ["@mui/material/styles" :refer [ThemeProvider]]
             ["@mui/material" :refer [AppBar
                                      Box
@@ -18,11 +20,13 @@
      "Health Samurai Assignment"]]])
 
 (defn app []
-  [:> ThemeProvider {:theme theme}
-   [:> CssBaseline]
-   [navbar]
-   [:main
-    [:> Box {:sx {:mt 2
-                  :m 4}}
-     [:> Paper {:width "100%"}
-      [patient-table]]]]])
+  (let [current-route @(rf/subscribe [::router.db/current-route])]
+    [:> ThemeProvider {:theme theme}
+     [:> CssBaseline]
+     [navbar]
+     [:main
+      [:> Box {:sx {:mt 2
+                    :m 4}}
+       [:> Paper {:width "100%"}
+        (when current-route
+          [(-> current-route :data :view)])]]]]))

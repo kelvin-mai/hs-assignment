@@ -32,4 +32,4 @@
 
           (testing "can delete patient"
             (patient.db/delete-by-id ds (:patient/id test-patient))
-            (is (= (count (patient.db/get-all ds)) 0))))))))
+            (is (= (count (patient.db/get-all ds {})) 0))))))))

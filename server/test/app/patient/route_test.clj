@@ -43,5 +43,3 @@
                                  :data)]
             (is (= (:success response) true))
             (is (= (count all-patients) 0))))))))
-
-
