@@ -1,5 +1,6 @@
 (ns app.util.conversion
-  (:require [tick.core :as t]))
+  (:require [tick.core :as t]
+            ["dayjs" :as dayjs]))
 
 (defn stringify-kw [kw]
   (str (when (namespace kw)
@@ -22,3 +23,10 @@
   (when s
     (let [inst (t/instant s)]
       (str (t/date inst) " " (t/time inst)))))
+
+(defn remove-nils [m]
+  (into {} (remove (comp nil? second) m)))
+
+(defn dayjs->date-string [d]
+  (when d
+    (.format (dayjs d) "YYYY-MM-DD")))

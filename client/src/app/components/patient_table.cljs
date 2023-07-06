@@ -5,14 +5,17 @@
                                          inst->datetime-string]]
             [app.db.patient :as patient.db]
             [app.db.router :as router.db]
-            ["@mui/material" :refer [Table
+            ["@mui/material" :refer [Box
+                                     Button
+                                     Table
                                      TableContainer
                                      TableHead
                                      TableRow
                                      TableCell
                                      TableBody
                                      TableSortLabel
-                                     TablePagination]]))
+                                     TablePagination
+                                     Typography]]))
 
 (def patient-table-heads
   [[:patient/id "ID"]
@@ -52,6 +55,19 @@
      (map patient-table-row rows))
     [:<>]))
 
+(defn empty-patients []
+  [:> Box {:width "100%"
+           :p 10
+           :flex true
+           :text-align "center"}
+   [:> Typography {:variant "p"
+                   :component "div"
+                   :sx {:mb 2}}
+    "No patients currently exist."]
+   [:> Button {:variant "outlined"
+               :on-click #(rf/dispatch [::router.db/push-state :app.router/new-patient])}
+    "Add new patient"]])
+
 (defn patient-table []
   (let [patients @(rf/subscribe [::patient.db/patients])
         {:keys [page
@@ -62,13 +78,15 @@
        (into [:> TableRow]
              (map patient-table-head patient-table-heads))]
       [patient-table-body patients]]
-     [:> TablePagination {:rows-per-page-options [5 10 25]
-                          :component "div"
-                          :count (or (:total (first patients)) 0)
-                          :rows-per-page rows-per-page
-                          :page page
-                          :on-page-change (fn [e new-page]
-                                            (.preventDefault e)
-                                            (rf/dispatch [::patient.db/set-page new-page]))
-                          :on-rows-per-page-change #(rf/dispatch [::patient.db/set-rows-per-page
-                                                                  (.. % -target -value)])}]]))
+     (if (empty? patients)
+       [empty-patients]
+       [:> TablePagination {:rows-per-page-options [5 10 25]
+                            :component "div"
+                            :count (or (:total (first patients)) 0)
+                            :rows-per-page rows-per-page
+                            :page page
+                            :on-page-change (fn [e new-page]
+                                              (.preventDefault e)
+                                              (rf/dispatch [::patient.db/set-page new-page]))
+                            :on-rows-per-page-change #(rf/dispatch [::patient.db/set-rows-per-page
+                                                                    (.. % -target -value)])}])]))

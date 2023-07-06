@@ -3,12 +3,14 @@
             [ajax.core :as ajax]
             [day8.re-frame.http-fx]
             [app.db.router :as router]
-            [app.db.patient :as patient]))
+            [app.db.patient :as patient]
+            [app.db.ui :as ui]))
 
 (def base-url "http://localhost:8080")
 
 (def initial-db
   (merge {}
+         ui/initial-state
          router/initial-state
          patient/initial-state))
 
