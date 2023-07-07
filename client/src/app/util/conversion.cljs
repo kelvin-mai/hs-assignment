@@ -22,7 +22,7 @@
 (defn inst->datetime-string [s]
   (when s
     (let [inst (t/instant s)]
-      (str (t/date inst) " " (t/time inst)))))
+      (str (t/date inst) " " (t/truncate (t/time inst) :minutes)))))
 
 (defn remove-nils [m]
   (into {} (remove (comp nil? second) m)))

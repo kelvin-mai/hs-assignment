@@ -17,6 +17,7 @@
                            :attr :patient/created
                            :dir :desc}
               :editable? false
+              :show-validation? false
               :form initial-form
               :data []}})
 
@@ -44,7 +45,7 @@
 
 (rf/reg-event-fx
  ::fetch-patient
- (fn [{:keys [db]} [_ id]]
+ (fn [_ [_ id]]
    {:fx [[:dispatch [:http {:url (str "/api/patient/" id)
                             :method :get
                             :on-success [::fetch-patient-success]}]]]}))
@@ -55,6 +56,18 @@
    (let [data (-> data
                   (assoc :patient/dob (inst-string->dayjs (:patient/dob data))))]
      (assoc-in db [::patient :form] data))))
+
+(rf/reg-event-fx
+ ::validate-submit-patient-form
+ (fn [{:keys [db]} _]
+   (let [data (get-in db [::patient :form])
+         valid? (and (:patient/name data)
+                     (:patient/sex data)
+                     (:patient/dob data))]
+     {:db (if valid?
+            db
+            (assoc-in db [::patient :show-validation?] true))
+      :fx [(when valid? [:dispatch [::submit-patient-form]])]})))
 
 (rf/reg-event-fx
  ::submit-patient-form
@@ -78,14 +91,28 @@
       :fx [[:dispatch [:http {:url url
                               :data data
                               :method method
-                              :on-success [:app.db.router/push-state :app.router/home]}]]]})))
+                              :on-success [::submit-patient-form-success]}]]]})))
+
+(rf/reg-event-fx
+ ::submit-patient-form-success
+ (fn [_ _]
+   {:fx [[:dispatch [:app.db.ui/set-alert {:severity "success"
+                                           :message "Patient data successfully submitted."}]]
+         [:dispatch [:app.db.router/push-state :app.router/home]]]}))
 
 (rf/reg-event-fx
  ::delete-patient
  (fn [_ [_ id]]
    {:fx [[:dispatch [:http {:url (str "/api/patient/" id)
                             :method :delete
-                            :on-success [:app.db.router/push-state :app.router/home]}]]]}))
+                            :on-success [::delete-patient-success]}]]]}))
+
+(rf/reg-event-fx
+ ::delete-patient-success
+ (fn [_ _]
+   {:fx [[:dispatch [:app.db.ui/set-alert {:severity "success"
+                                           :message "Patient data successfully deleted."}]]
+         [:dispatch [:app.db.router/push-state :app.router/home]]]}))
 
 (rf/reg-event-db
  ::set-editable?
@@ -129,7 +156,9 @@
 (rf/reg-event-db
  ::reset-form-values
  (fn [db [_ _]]
-   (assoc-in db [::patient :form] initial-form)))
+   (-> db
+       (assoc-in [::patient :form] initial-form)
+       (assoc-in [::patient :show-validation?] false))))
 
 (rf/reg-sub
  ::patients
@@ -146,3 +175,7 @@
 (rf/reg-sub
  ::form
  (fn [db] (get-in db [::patient :form])))
+
+(rf/reg-sub
+ ::show-validation?
+ (fn [db] (get-in db [::patient :show-validation?])))

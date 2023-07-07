@@ -32,7 +32,9 @@
                  :on-success on-success
                  :on-failure (or on-failure [:http-failure])}}))
 
-(rf/reg-event-db
+(rf/reg-event-fx
  :http-failure
- (fn [db [_ {:keys [response]}]]
-   (js/console.log :http-failure response)))
+ (fn [_ {:keys [response]}]
+   (js/console.error "response" response)
+   {:fx [[:dispatch [:app.db.ui/set-alert {:severity "error"
+                                           :message "Something went wrong. Please try again"}]]]}))

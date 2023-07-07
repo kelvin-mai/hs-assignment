@@ -5,6 +5,7 @@
             [app.db.ui :as ui.db]
             ["@mui/material/styles" :refer [ThemeProvider]]
             ["@mui/material" :refer [AppBar
+                                     Alert
                                      Box
                                      CssBaseline
                                      Divider
@@ -16,6 +17,7 @@
                                      ListItemIcon
                                      ListItemText
                                      Paper
+                                     Snackbar
                                      Toolbar
                                      Typography]]
             ["@mui/icons-material" :refer [Dataset
@@ -63,11 +65,20 @@
           :icon PersonAdd}])]]]))
 
 (defn app []
-  (let [current-route @(rf/subscribe [::router.db/current-route])]
+  (let [current-route @(rf/subscribe [::router.db/current-route])
+        {:keys [open
+                severity
+                message]} @(rf/subscribe [::ui.db/alert])]
     [:> ThemeProvider {:theme theme}
      [:> CssBaseline]
      [navbar]
      [navmenu]
+     [:> Snackbar {:open open
+                   :anchor-origin {:vertical "top"
+                                   :horizontal "center"}
+                   :auto-hide-duration 2000
+                   :on-close #(rf/dispatch [::ui.db/close-alert])}
+      [:> Alert {:severity severity} message]]
      [:main
       [:> Box {:sx {:mt 2
                     :m 4}}

@@ -5,6 +5,7 @@
             [app.db.patient :as patient.db]
             ["@mui/material" :refer [Button
                                      FormControl
+                                     FormHelperText
                                      InputLabel
                                      MenuItem
                                      Grid
@@ -13,45 +14,53 @@
                                      Typography]]
             ["@mui/x-date-pickers/AdapterDayjs" :refer [AdapterDayjs]]
             ["@mui/x-date-pickers" :refer [LocalizationProvider
-                                           DatePicker
                                            DateCalendar]]))
 
 (defn input
-  [{:keys [xs label attr value required disabled]}]
-  [:> Grid {:item true
-            :xs xs}
-   [:> TextField {:full-width true
-                  :required required
-                  :disabled disabled
-                  :label label
-                  :value (or value "")
-                  :on-change #(rf/dispatch [::patient.db/set-form-value attr
-                                            (.. % -target -value)])}]])
+  [{:keys [xs label attr value required disabled show-validation?]}]
+  (let [display-error? (and show-validation? (s/blank? value))]
+    [:> Grid {:item true
+              :xs xs}
+     [:> TextField {:full-width true
+                    :required required
+                    :disabled disabled
+                    :error display-error?
+                    :helper-text (when display-error?
+                                   "Incorrect entry")
+                    :label label
+                    :value (or value "")
+                    :on-change #(rf/dispatch [::patient.db/set-form-value attr
+                                              (.. % -target -value)])}]]))
 
 (defn select-options [value]
   ^{:key value}
   [:> MenuItem {:value value} (s/capitalize value)])
 
 (defn select
-  [{:keys [xs label attr value options required disabled]}]
-  [:> Grid {:item true
-            :xs xs}
-   [:> FormControl {:full-width true
-                    :required required}
-    [:> InputLabel label]
-    [:> Select {:label label
-                :value (or value "")
-                :disabled disabled
-                :on-change #(rf/dispatch [::patient.db/set-form-value attr
-                                          (.. % -target -value)])}
-     [:> MenuItem {:value nil} "Unselect"]
-     (map select-options options)]]])
+  [{:keys [xs label attr value options required disabled show-validation?]}]
+  (let [display-error? (and show-validation? (s/blank? value))]
+    [:> Grid {:item true
+              :xs xs}
+     [:> FormControl {:full-width true
+                      :required required
+                      :error display-error?}
+      [:> InputLabel label]
+      [:> Select {:label label
+                  :value (or value "")
+                  :disabled disabled
+                  :on-change #(rf/dispatch [::patient.db/set-form-value attr
+                                            (.. % -target -value)])}
+       [:> MenuItem {:value nil} "Unselect"]
+       (map select-options options)]
+      (when display-error?
+        [:> FormHelperText "Incorrect entry"])]]))
 
-(defn datepicker [{:keys [xs label attr value required disabled]}]
+(defn datepicker [{:keys [xs label attr value required disabled show-validation?]}]
   [:> Grid {:item true
             :xs xs}
    [:> FormControl {:full-width true
-                    :required required}
+                    :required required
+                    :error (and show-validation? (nil? value))}
     [:> InputLabel label]
     [:> LocalizationProvider {:dateAdapter AdapterDayjs}
      [:> DateCalendar {:label label
@@ -70,7 +79,8 @@
                         sex
                         gender
                         dob]} @(rf/subscribe [::patient.db/form])
-        disabled (and existing-patient (not editable?))]
+        disabled (and existing-patient (not editable?))
+        show-validation? @(rf/subscribe [::patient.db/show-validation?])]
     [:> Grid {:container true
               :spacing 2
               :sx {:px 4
@@ -95,7 +105,8 @@
              :attr :patient/name
              :required true
              :value name
-             :disabled disabled}]
+             :disabled disabled
+             :show-validation? show-validation?}]
      [input {:xs 12
              :label "Address"
              :attr :patient/address
@@ -107,6 +118,7 @@
               :value sex
               :required true
               :disabled disabled
+              :show-validation? show-validation?
               :options ["male" "female"]}]
      [select {:xs 6
               :label "Gender"
@@ -119,6 +131,7 @@
                   :attr :patient/dob
                   :value dob
                   :required true
+                  :show-validation? show-validation?
                   :disabled disabled}]
      [:> Grid {:item true
                :xs 6}
@@ -132,5 +145,5 @@
                :xs 6}
       [:> Button {:variant "contained"
                   :full-width true
-                  :on-click #(rf/dispatch [::patient.db/submit-patient-form])}
+                  :on-click #(rf/dispatch [::patient.db/validate-submit-patient-form])}
        "Submit"]]]))

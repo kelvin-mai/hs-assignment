@@ -18,7 +18,9 @@
                    [{:parameters {:path [:id]}
                      :start (fn [params]
                               (rf/dispatch [::patient.db/fetch-patient
-                                            (get-in params [:path :id])]))}]}]
+                                            (get-in params [:path :id])]))
+                     :stop (fn []
+                             (rf/dispatch [::patient.db/set-editable? false]))}]}]
    ["new-patient" {:name ::new-patient
                    :view patient-form
                    :controllers
