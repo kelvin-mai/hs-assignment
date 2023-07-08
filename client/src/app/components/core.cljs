@@ -31,6 +31,7 @@
                     :edge "start"
                     :color "inherit"
                     :sx {:mr 2}
+                    :data-test-id "open-navmenu"
                     :on-click #(rf/dispatch [::ui.db/set-menu true])}
      [:> Menu]]
     [:> Typography {:variant "h6"
@@ -41,7 +42,8 @@
 (defn navlink [{:keys [label link icon]}]
   ^{:key link}
   [:> ListItem {:disable-padding true}
-   [:> ListItemButton {:on-click #(rf/dispatch [::ui.db/push-state link])}
+   [:> ListItemButton {:data-test-id (str link)
+                       :on-click #(rf/dispatch [::ui.db/push-state link])}
     [:> ListItemIcon
      [:> icon]]
     [:> ListItemText {:primary label}]]])
@@ -77,6 +79,7 @@
                    :anchor-origin {:vertical "top"
                                    :horizontal "center"}
                    :auto-hide-duration 2000
+                   :data-test-id "snackbar"
                    :on-close #(rf/dispatch [::ui.db/close-alert])}
       [:> Alert {:severity severity} message]]
      [:main

@@ -28,6 +28,7 @@
                     :helper-text (when display-error?
                                    "Incorrect entry")
                     :label label
+                    :data-test-id (str attr)
                     :value (or value "")
                     :on-change #(rf/dispatch [::patient.db/set-form-value attr
                                               (.. % -target -value)])}]]))
@@ -43,6 +44,7 @@
               :xs xs}
      [:> FormControl {:full-width true
                       :required required
+                      :data-test-id (str attr)
                       :error display-error?}
       [:> InputLabel label]
       [:> Select {:label label
@@ -60,6 +62,7 @@
             :xs xs}
    [:> FormControl {:full-width true
                     :required required
+                    :data-test-id (str attr)
                     :error (and show-validation? (nil? value))}
     [:> InputLabel label]
     [:> LocalizationProvider {:dateAdapter AdapterDayjs}
@@ -87,7 +90,8 @@
                    :py 2}}
      [:> Grid {:item true
                :xs 8}
-      [:> Typography {:variant "h5"}
+      [:> Typography {:variant "h5"
+                      :data-test-id "patient-form-title"}
        (if existing-patient
          (str "Patient > " id)
          "New Patient")]]
@@ -96,6 +100,7 @@
       (when existing-patient
         [:> Button {:variant "outlined"
                     :full-width true
+                    :data-test-id "edit-patient"
                     :on-click #(rf/dispatch [::patient.db/set-editable? (not editable?)])}
          (if editable?
            "Cancel"
@@ -139,11 +144,13 @@
         [:> Button {:variant "contained"
                     :full-width true
                     :color "secondary"
+                    :data-test-id "delete-patient"
                     :on-click #(rf/dispatch [::patient.db/delete-patient id])}
          "Delete"])]
      [:> Grid {:item true
                :xs 6}
       [:> Button {:variant "contained"
                   :full-width true
+                  :type "submit"
                   :on-click #(rf/dispatch [::patient.db/validate-submit-patient-form])}
        "Submit"]]]))

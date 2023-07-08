@@ -66,7 +66,8 @@
                    :sx {:mb 2}}
     "No patients currently exist."]
    [:> Button {:variant "outlined"
-               :on-click #(rf/dispatch [::router.db/push-state :app.router/new-patient])}
+               :on-click #(rf/dispatch [::router.db/push-state :app.router/new-patient])
+               :data-test-id "empty-patients-create"}
     "Add new patient"]])
 
 (defn patient-table []
