@@ -18,22 +18,30 @@
                      4 "other"}]
     (get num-to-enum num)))
 
+(defn maybe-nil [x]
+  (when-not (= (rand-int 2) 0)
+    x))
+
 (defn random-patient []
-  (let [gender (random-gender)
-        first-name (case gender
-                     "man" (fake/first-name-male)
-                     "woman" (fake/first-name-female)
-                     (fake/first-name))
-        last-name (fake/last-name)
+  (let [gender (maybe-nil (random-gender))
         sex (if (= :male (fake/sex))
               "male"
               "female")
-        address (fake/address)]
+        first-name (case gender
+                     "man" (fake/first-name-male)
+                     "woman" (fake/first-name-female)
+                     (case sex
+                       "male" (fake/first-name-male)
+                       "female" (fake/first-name-female)
+                       (fake/first-name)))
+        last-name (fake/last-name)
+        address (maybe-nil (fake/address))]
     {:name (str first-name " " last-name)
      :sex sex
      :gender gender
      :dob (random-age-date)
-     :address (str (:street-number address) " " (:street address))}))
+     :address (when address
+                (str (:street-number address) " " (:street address)))}))
 
 (defn insert-random-patient [db]
   (let [patient (random-patient)]

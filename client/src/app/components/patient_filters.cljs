@@ -17,7 +17,8 @@
                         sex
                         gender]} @(rf/subscribe [::patient.db/filters])]
     [:> Accordion
-     [:> AccordionSummary {:expand-icon (r/create-element ExpandMore)}
+     [:> AccordionSummary {:expand-icon (r/create-element ExpandMore)
+                           :data-test-id "open-search-filter"}
       "Search Criteria"]
      [:> AccordionDetails
       [:> Grid {:container true
@@ -57,5 +58,6 @@
                  :xs 2}
         [:> Button {:variant "contained"
                     :full-width true
-                    :on-click #(rf/dispatch [::patient.db/search-patients])}
+                    :on-click #(rf/dispatch [::patient.db/search-patients])
+                    :data-test-id "patient-search"}
          "Search"]]]]]))

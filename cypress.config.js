@@ -16,9 +16,7 @@ module.exports = defineConfig({
 
       on("task", {
         initTestData: function (filename) {
-          return client.query(
-            fs.readFileSync(filename || "cypress/empty_database.sql", "utf8")
-          );
+          return client.query(fs.readFileSync(filename, "utf8"));
         },
       });
     },

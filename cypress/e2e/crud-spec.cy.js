@@ -4,7 +4,7 @@ const url = "http://localhost:8080";
 
 describe("patient crud e2e spec", () => {
   before(() => {
-    return cy.task("initTestData");
+    return cy.task("initTestData", "cypress/empty_database.sql");
   });
 
   beforeEach(() => {
