@@ -19,7 +19,14 @@
               :editable? false
               :show-validation? false
               :form initial-form
+              :filters initial-form
               :data []}})
+
+(rf/reg-event-fx
+ ::search-patients
+ (fn [{:keys [db]} _]
+   {:db (assoc-in db [::patient :pagination :page] 0)
+    :fx [[:dispatch [::fetch-patients]]]}))
 
 (rf/reg-event-fx
  ::fetch-patients
@@ -29,12 +36,17 @@
                  attr
                  dir]} (get-in db [::patient :pagination])
          offset (* page rows-per-page)
+         filters (-> db
+                     (get-in [::patient :filters])
+                     (remove-nils))
+         query (merge {:limit rows-per-page
+                       :offset offset
+                       :attr (stringify-kw attr)
+                       :dir dir}
+                      filters)
          url "/api/patient"]
      {:fx [[:dispatch [:http {:url url
-                              :query {:limit rows-per-page
-                                      :offset offset
-                                      :attr (stringify-kw attr)
-                                      :dir dir}
+                              :query query
                               :method :get
                               :on-success [::fetch-patients-success]}]]]})))
 
@@ -160,6 +172,16 @@
        (assoc-in [::patient :form] initial-form)
        (assoc-in [::patient :show-validation?] false))))
 
+(rf/reg-event-db
+ ::set-filter-value
+ (fn [db [_ attr v]]
+   (assoc-in db [::patient :filters attr] v)))
+
+(rf/reg-event-db
+ ::reset-filter-values
+ (fn [db [_ _]]
+   (assoc-in db [::patient :filters] initial-form)))
+
 (rf/reg-sub
  ::patients
  (fn [db] (get-in db [::patient :data])))
@@ -175,6 +197,10 @@
 (rf/reg-sub
  ::form
  (fn [db] (get-in db [::patient :form])))
+
+(rf/reg-sub
+ ::filters
+ (fn [db] (get-in db [::patient :filters])))
 
 (rf/reg-sub
  ::show-validation?

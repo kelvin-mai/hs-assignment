@@ -7,12 +7,30 @@
     (:sex data) (assoc :sex [:cast (:sex data) :sex])
     (:gender data) (assoc :gender [:cast (:gender data) :gender])))
 
+(defn- build-where
+  [{:patient/keys [name
+                   address
+                   sex
+                   gender]}]
+  (let [name-clause [:ilike :patient.name (str "%" name "%")]
+        address-clause [:ilike :patient.address (str "%" address "%")]
+        sex-clause [:= :patient.sex [:cast sex :sex]]
+        gender-clause [:= :patient.gender [:cast gender :gender]]]
+    (when (or name address sex gender)
+      (cond-> [:and]
+        name (conj name-clause)
+        address (conj address-clause)
+        sex (conj sex-clause)
+        gender (conj gender-clause)))))
+
 (defn search-query
-  [{:keys [attr dir limit offset]}]
+  [{:keys [attr dir limit offset] :as query-params}]
   (let [query {:select [:*
                         [[:over [[:count :patient.id]]] "total"]]
-               :from :patient}]
+               :from :patient}
+        where-clause (build-where query-params)]
     (cond-> query
+      where-clause (assoc :where where-clause)
       (and attr dir) (sqlh/order-by [(keyword attr) (keyword dir) :null-last])
       limit (sqlh/limit limit)
       offset (sqlh/offset offset))))

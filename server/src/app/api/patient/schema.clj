@@ -11,12 +11,19 @@
    [:id (nanoid?)]])
 
 (def search-query
-  (mu/optional-keys
-   [:map
-    [:attr :keyword]
-    [:dir [:enum :asc :desc]]
-    [:limit :int]
-    [:offset :int]]))
+  (mu/merge
+   (mu/optional-keys
+    [:map
+     [:attr :keyword]
+     [:dir [:enum :asc :desc]]
+     [:limit :int]
+     [:offset :int]])
+   (mu/optional-keys
+    [:map
+     [:patient/name non-blank-string?]
+     [:patient/address non-blank-string?]
+     [:patient/sex sex?]
+     [:patient/gender gender?]])))
 
 (def create-body
   (mu/merge

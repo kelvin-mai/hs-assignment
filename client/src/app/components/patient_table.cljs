@@ -3,6 +3,7 @@
             [app.util.conversion :refer [same-sex-gender
                                          inst->date-string
                                          inst->datetime-string]]
+            [app.components.patient-filters :refer [patient-filters]]
             [app.db.patient :as patient.db]
             [app.db.router :as router.db]
             ["@mui/material" :refer [Box
@@ -72,21 +73,23 @@
   (let [patients @(rf/subscribe [::patient.db/patients])
         {:keys [page
                 rows-per-page]} @(rf/subscribe [::patient.db/pagination])]
-    [:> TableContainer
-     [:> Table {:sx {:min-width 650}}
-      [:> TableHead
-       (into [:> TableRow]
-             (map patient-table-head patient-table-heads))]
-      [patient-table-body patients]]
-     (if (empty? patients)
-       [empty-patients]
-       [:> TablePagination {:rows-per-page-options [5 10 25]
-                            :component "div"
-                            :count (or (:total (first patients)) 0)
-                            :rows-per-page rows-per-page
-                            :page page
-                            :on-page-change (fn [e new-page]
-                                              (.preventDefault e)
-                                              (rf/dispatch [::patient.db/set-page new-page]))
-                            :on-rows-per-page-change #(rf/dispatch [::patient.db/set-rows-per-page
-                                                                    (.. % -target -value)])}])]))
+    [:<>
+     [patient-filters]
+     [:> TableContainer
+      [:> Table {:sx {:min-width 650}}
+       [:> TableHead
+        (into [:> TableRow]
+              (map patient-table-head patient-table-heads))]
+       [patient-table-body patients]]
+      (if (empty? patients)
+        [empty-patients]
+        [:> TablePagination {:rows-per-page-options [5 10 25]
+                             :component "div"
+                             :count (or (:total (first patients)) 0)
+                             :rows-per-page rows-per-page
+                             :page page
+                             :on-page-change (fn [e new-page]
+                                               (.preventDefault e)
+                                               (rf/dispatch [::patient.db/set-page new-page]))
+                             :on-rows-per-page-change #(rf/dispatch [::patient.db/set-rows-per-page
+                                                                     (.. % -target -value)])}])]]))
