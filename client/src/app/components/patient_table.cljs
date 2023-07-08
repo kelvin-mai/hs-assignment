@@ -64,7 +64,7 @@
    [:> Typography {:variant "p"
                    :component "div"
                    :sx {:mb 2}}
-    "No patients currently exist."]
+    "No patients currently exist with this search criteria."]
    [:> Button {:variant "outlined"
                :on-click #(rf/dispatch [::router.db/push-state :app.router/new-patient])
                :data-test-id "empty-patients-create"}

@@ -1,5 +1,6 @@
 (ns app.util.conversion
-  (:require [tick.core :as t]
+  (:require [clojure.string :as s]
+            [tick.core :as t]
             ["dayjs" :as dayjs]))
 
 (defn stringify-kw [kw]
@@ -25,7 +26,7 @@
       (str (t/date inst) " " (t/truncate (t/time inst) :minutes)))))
 
 (defn remove-nils [m]
-  (into {} (remove (comp nil? second) m)))
+  (into {} (remove (comp s/blank? second) m)))
 
 (defn dayjs->date-string [d]
   (when d
@@ -34,3 +35,6 @@
 (defn inst-string->dayjs [d]
   (when d
     (dayjs d)))
+
+(defn v [e]
+  (.. e -target -value))

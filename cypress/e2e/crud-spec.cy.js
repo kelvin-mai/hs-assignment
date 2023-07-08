@@ -2,7 +2,7 @@ const dayjs = require("dayjs");
 
 const url = "http://localhost:8080";
 
-describe("e2e spec", () => {
+describe("patient crud e2e spec", () => {
   before(() => {
     return cy.task("initTestData");
   });

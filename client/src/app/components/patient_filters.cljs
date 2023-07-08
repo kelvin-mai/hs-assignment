@@ -1,49 +1,15 @@
 (ns app.components.patient-filters
   (:require [reagent.core :as r]
             [re-frame.core :as rf]
-            [clojure.string :as s]
+            [app.components.common :refer [input
+                                           select]]
             [app.db.patient :as patient.db]
             ["@mui/material" :refer [Accordion
                                      AccordionSummary
                                      AccordionDetails
                                      Button
-                                     FormControl
-                                     InputLabel
-                                     MenuItem
-                                     Grid
-                                     Select
-                                     TextField
-                                     Typography]]
+                                     Grid]]
             ["@mui/icons-material" :refer [ExpandMore]]))
-
-(defn input
-  [{:keys [xs label attr value]}]
-  (let []
-    [:> Grid {:item true
-              :xs xs}
-     [:> TextField {:full-width true
-                    :label label
-                    :value (or value "")
-                    :on-change #(rf/dispatch [::patient.db/set-filter-value
-                                              attr (.. % -target -value)])}]]))
-
-(defn select-options [value]
-  ^{:key value}
-  [:> MenuItem {:value value} (s/capitalize value)])
-
-(defn select
-  [{:keys [xs label attr value options]}]
-  (let []
-    [:> Grid {:item true
-              :xs xs}
-     [:> FormControl {:full-width true}
-      [:> InputLabel label]
-      [:> Select {:label label
-                  :value (or value "")
-                  :on-change #(rf/dispatch [::patient.db/set-filter-value
-                                            attr (.. % -target -value)])}
-       [:> MenuItem {:value nil} "Unselect"
-        (map select-options options)]]]]))
 
 (defn patient-filters []
   (let [{:patient/keys [name
@@ -51,7 +17,7 @@
                         sex
                         gender]} @(rf/subscribe [::patient.db/filters])]
     [:> Accordion
-     [:> AccordionSummary
+     [:> AccordionSummary {:expand-icon (r/create-element ExpandMore)}
       "Search Criteria"]
      [:> AccordionDetails
       [:> Grid {:container true
@@ -59,20 +25,24 @@
        [input {:xs 3
                :label "Name"
                :attr :patient/name
-               :value name}]
+               :value name
+               :on-change ::patient.db/set-filter-value}]
        [input {:xs 3
                :label "Address"
                :attr :patient/address
-               :value address}]
+               :value address
+               :on-change ::patient.db/set-filter-value}]
        [select {:xs 3
                 :label "Sex"
                 :attr :patient/sex
                 :value sex
+                :on-change ::patient.db/set-filter-value
                 :options ["male" "female"]}]
        [select {:xs 3
                 :label "Gender"
                 :attr :patient/gender
                 :value gender
+                :on-change ::patient.db/set-filter-value
                 :options ["man" "woman" "non-binary" "other"]}]
        [:> Grid {:item true
                  :xs 8}]

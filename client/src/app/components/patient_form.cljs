@@ -1,61 +1,17 @@
 (ns app.components.patient-form
   (:require [re-frame.core :as rf]
-            [clojure.string :as s]
+            [app.components.common :refer [input
+                                           select]]
             [app.db.router :as router.db]
             [app.db.patient :as patient.db]
             ["@mui/material" :refer [Button
                                      FormControl
-                                     FormHelperText
                                      InputLabel
-                                     MenuItem
                                      Grid
-                                     Select
-                                     TextField
                                      Typography]]
             ["@mui/x-date-pickers/AdapterDayjs" :refer [AdapterDayjs]]
             ["@mui/x-date-pickers" :refer [LocalizationProvider
                                            DateCalendar]]))
-
-(defn input
-  [{:keys [xs label attr value required disabled show-validation?]}]
-  (let [display-error? (and show-validation? (s/blank? value))]
-    [:> Grid {:item true
-              :xs xs}
-     [:> TextField {:full-width true
-                    :required required
-                    :disabled disabled
-                    :error display-error?
-                    :helper-text (when display-error?
-                                   "Incorrect entry")
-                    :label label
-                    :data-test-id (str attr)
-                    :value (or value "")
-                    :on-change #(rf/dispatch [::patient.db/set-form-value attr
-                                              (.. % -target -value)])}]]))
-
-(defn select-options [value]
-  ^{:key value}
-  [:> MenuItem {:value value} (s/capitalize value)])
-
-(defn select
-  [{:keys [xs label attr value options required disabled show-validation?]}]
-  (let [display-error? (and show-validation? (s/blank? value))]
-    [:> Grid {:item true
-              :xs xs}
-     [:> FormControl {:full-width true
-                      :required required
-                      :data-test-id (str attr)
-                      :error display-error?}
-      [:> InputLabel label]
-      [:> Select {:label label
-                  :value (or value "")
-                  :disabled disabled
-                  :on-change #(rf/dispatch [::patient.db/set-form-value attr
-                                            (.. % -target -value)])}
-       [:> MenuItem {:value nil} "Unselect"]
-       (map select-options options)]
-      (when display-error?
-        [:> FormHelperText "Incorrect entry"])]]))
 
 (defn datepicker [{:keys [xs label attr value required disabled show-validation?]}]
   [:> Grid {:item true
@@ -110,17 +66,20 @@
              :attr :patient/name
              :required true
              :value name
+             :on-change ::patient.db/set-form-value
              :disabled disabled
              :show-validation? show-validation?}]
      [input {:xs 12
              :label "Address"
              :attr :patient/address
              :value address
+             :on-change ::patient.db/set-form-value
              :disabled disabled}]
      [select {:xs 6
               :label "Sex"
               :attr :patient/sex
               :value sex
+              :on-change ::patient.db/set-form-value
               :required true
               :disabled disabled
               :show-validation? show-validation?
@@ -129,6 +88,7 @@
               :label "Gender"
               :attr :patient/gender
               :value gender
+              :on-change ::patient.db/set-form-value
               :disabled disabled
               :options ["man" "woman" "non-binary" "other"]}]
      [datepicker {:xs 12
