@@ -13,7 +13,7 @@ describe("patient search e2e spec", () => {
 
   it("should have 100 results without filters", () => {
     cy.intercept({
-      url: "/api/patient?limit=10&offset=0&attr=patient%2Fcreated&dir=desc",
+      pathname: "/api/patient",
       method: "GET",
     }).as("patient-search");
     cy.get("[data-test-id=patient-search]").click();
@@ -25,8 +25,11 @@ describe("patient search e2e spec", () => {
 
   it("should have 3 Ryan results", () => {
     cy.intercept({
-      url: "/api/patient?limit=10&offset=0&attr=patient%2Fcreated&dir=desc&patient/name=Ryan",
+      pathname: "/api/patient",
       method: "GET",
+      query: {
+        "patient/name": "Ryan",
+      },
     }).as("patient-search");
     cy.get("[data-test-id=':patient/name']").type("Ryan", { delay: 120 });
     cy.get("[data-test-id=patient-search]").click();
@@ -38,8 +41,11 @@ describe("patient search e2e spec", () => {
 
   it("should have 14 Street results", () => {
     cy.intercept({
-      url: "/api/patient?limit=10&offset=0&attr=patient%2Fcreated&dir=desc&patient/address=Street",
+      pathname: "/api/patient",
       method: "GET",
+      query: {
+        "patient/address": "Street",
+      },
     }).as("patient-search");
     cy.get("[data-test-id=':patient/address']").type("Street", { delay: 120 });
     cy.get("[data-test-id=patient-search]").click();
@@ -51,8 +57,11 @@ describe("patient search e2e spec", () => {
 
   it("should have 59 male results", () => {
     cy.intercept({
-      url: "/api/patient?limit=10&offset=0&attr=patient%2Fcreated&dir=desc&patient/sex=male",
+      pathname: "/api/patient",
       method: "GET",
+      query: {
+        "patient/sex": "male",
+      },
     }).as("patient-search");
     cy.get("[data-test-id=':patient/sex']").click();
     cy.get("li").contains("Male").click();
@@ -63,17 +72,67 @@ describe("patient search e2e spec", () => {
     });
   });
 
-  it("should have 6 woman results", () => {
+  it("should have 35 woman results", () => {
     cy.intercept({
-      url: "/api/patient?limit=10&offset=0&attr=patient%2Fcreated&dir=desc&patient/gender=woman",
+      pathname: "/api/patient",
       method: "GET",
+      query: {
+        "patient/gender": "woman",
+      },
     }).as("patient-search");
     cy.get("[data-test-id=':patient/gender']").click();
     cy.get("li").contains("Woman").click();
     cy.get("[data-test-id=patient-search]").click();
     cy.wait("@patient-search").then((intercept) => {
       const total = intercept.response.body.data[0].total;
-      expect(total).eq(6);
+      expect(total).eq(35);
+    });
+  });
+
+  it("should have age results", () => {
+    cy.intercept({
+      pathname: "/api/patient",
+      method: "GET",
+      query: {
+        "patient/age": "under 5",
+      },
+    }).as("patient-search");
+    cy.get("[data-test-id=':patient/age']").click();
+    cy.get("li").contains("Under 5").click();
+    cy.get("[data-test-id=patient-search]").click();
+    cy.wait("@patient-search").then((intercept) => {
+      const total = intercept.response.body.data[0].total;
+      expect(total).eq(1);
+    });
+
+    cy.intercept({
+      pathname: "/api/patient",
+      method: "GET",
+      query: {
+        "patient/age": "65 and older",
+      },
+    }).as("patient-search");
+    cy.get("[data-test-id=':patient/age']").click();
+    cy.get("li").contains("65 and older").click();
+    cy.get("[data-test-id=patient-search]").click();
+    cy.wait("@patient-search").then((intercept) => {
+      const total = intercept.response.body.data[0].total;
+      expect(total).eq(35);
+    });
+
+    cy.intercept({
+      pathname: "/api/patient",
+      method: "GET",
+      query: {
+        "patient/age": "18 - 64",
+      },
+    }).as("patient-search");
+    cy.get("[data-test-id=':patient/age']").click();
+    cy.get("li").contains("18 - 64").click();
+    cy.get("[data-test-id=patient-search]").click();
+    cy.wait("@patient-search").then((intercept) => {
+      const total = intercept.response.body.data[0].total;
+      expect(total).eq(51);
     });
   });
 });

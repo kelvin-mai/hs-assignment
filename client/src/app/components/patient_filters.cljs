@@ -15,7 +15,8 @@
   (let [{:patient/keys [name
                         address
                         sex
-                        gender]} @(rf/subscribe [::patient.db/filters])]
+                        gender
+                        age]} @(rf/subscribe [::patient.db/filters])]
     [:> Accordion
      [:> AccordionSummary {:expand-icon (r/create-element ExpandMore)
                            :data-test-id "open-search-filter"}
@@ -45,8 +46,17 @@
                 :value gender
                 :on-change ::patient.db/set-filter-value
                 :options ["man" "woman" "non-binary" "other"]}]
+       [select {:xs 3
+                :label "Age"
+                :attr :patient/age
+                :value age
+                :on-change ::patient.db/set-filter-value
+                :options ["under 5"
+                          "5 - 18"
+                          "18 - 64"
+                          "65 and older"]}]
        [:> Grid {:item true
-                 :xs 8}]
+                 :xs 5}]
        [:> Grid {:item true
                  :xs 2}
         [:> Button {:variant "contained"

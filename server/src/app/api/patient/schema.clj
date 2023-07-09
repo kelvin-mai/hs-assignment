@@ -23,7 +23,8 @@
      [:patient/name non-blank-string?]
      [:patient/address non-blank-string?]
      [:patient/sex sex?]
-     [:patient/gender gender?]])))
+     [:patient/gender gender?]
+     [:patient/age non-blank-string?]])))
 
 (def create-body
   (mu/merge
